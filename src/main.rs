@@ -37,15 +37,18 @@ async fn execute(item_name: &str, num: i32) -> Result<(), Box<dyn Error>> {
     let p = path.to_str().unwrap();
     let base_path = format!("{}/{}", p, "images");
     // tasks
-    for link in links {
-        let final_path = format!("{}/{}", base_path, item);
-        tasks.push(tokio::spawn(async move {
-            fs::create_dir_all(&final_path).unwrap();
-            let _ = save_img_file(&final_path, &link).await;
-        }));
-    }
-    for task in tasks {
-        task.await?
+    if links.len() > 1 {
+        println!("{:#?}", links);
+        for link in links {
+            let final_path = format!("{}/{}", base_path, item);
+            tasks.push(tokio::spawn(async move {
+                fs::create_dir_all(&final_path).unwrap();
+                let _ = save_img_file(&final_path, &link).await;
+            }));
+        }
+        for task in tasks {
+            task.await?
+        }
     }
     Ok(())
 }
